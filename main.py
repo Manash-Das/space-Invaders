@@ -2,62 +2,37 @@ import pygame
 from random import randrange
 from numpy import arange
 
-########################## initialise the pygame###################
-pygame.init()
-############################## Title name #############################
-pygame.display.set_caption("Space invaders")
-############################## setting Icon ################
+############################## loading required Images   #############################
 icon = pygame.image.load("shooterJetIcon.png")
-pygame.display.set_icon(icon)
-############################## loading player spaceship   #############################
 playerSpaceship = pygame.image.load("space-ship.png")
-############################### player spaceship coordinate ########################
-player_x_coordinates, player_y_coordinates = 370, 480
-############################### loading enemies ####################################
 enemyImg = pygame.image.load("ufo.png")
-############################## loading background #####################
 backgroundImg = pygame.image.load("background image.jpg")
-############################## loading Bullet ############
 bulletImg = pygame.image.load("bullet.png")
-bullet_x = 0
-bullet_y = 0
-############################## enemyImg coordinates ##########################
 
 
 def randomPositionEnemy():
     return randrange(0, 800), randrange(0, 70)
 
 
-enemy_x_coordinates, enemy_y_coordinates = randomPositionEnemy()
-
-############################### Create a window ##########################################
-screen = pygame.display.set_mode((800, 600))
-
-
-##################   function to draw the player in the respective coordinates ############
-def player():
-    screen.blit(playerSpaceship, (player_x_coordinates, player_y_coordinates))
-
-
-##################   function to draw the enemyImg in the respective coordinates ############
-def enemy():
-    screen.blit(enemyImg, (enemy_x_coordinates, enemy_y_coordinates))
+################## Coordinates of image to display ###############################
+player_x, player_y = 370, 480
+enemy_x, enemy_y = randomPositionEnemy()
+bullet_x, bullet_y, bulletState = 370, 464, "ready"
+player_bullet_x, player_bullet_y = 20, 16
+################## movement of Images by declared pixel ########################
+playerChange = 0.5
+enemyChange = 0.3
+bulletChange = 0.8
 
 
-def background():
+##################   function to draw the all the images in their respective coordinates ############
+def displayImage(playerCoordinate, enemyCoordinates, bulletCoordinates):
     screen.blit(backgroundImg, (0, 0))
-
-
-def bullet():
-    screen.blit(bulletImg, (bullet_x_coordinates, bullet_y_coordinates))
-
-
-############## For pressing key changing value of x coordinates and y coordinates is initialized ##############
-xChange = 0
-yChange = 0
-
-###################### Movement of spaceship by 0.5 pixel is declared ####################
-movingIndex = 0.5
+    screen.blit(playerSpaceship, playerCoordinate)
+    screen.blit(enemyImg, enemyCoordinates)
+    print(bulletState)
+    if bulletState == "fire":
+        screen.blit(bulletImg, bulletCoordinates)
 
 
 ##################### Tracking player movement and restricting to move #############
@@ -77,29 +52,40 @@ def playerCondition(x_coordinates, y_coordinates):
 def enemyCondition(x_coordinates, y_coordinates):
     if x_coordinates > 800:
         x_coordinates = 0
-        y_coordinates += movingIndex + 10
+        y_coordinates += enemyChange
     else:
-        x_coordinates += movingIndex + 0.7
+        x_coordinates += enemyChange
     if y_coordinates > 600:
         print("YOU LOSE")
         return randomPositionEnemy()
     return x_coordinates, y_coordinates
 
 
-# def checkBlast(player_x_range, player_y_range, enemy_x_range, enemy_y_range):
-#     print(player_x_range, player_y_range, enemy_x_range, enemy_y_range)
-#     if player_x_range == enemy_x_range:
-#         print("boom")
-#     if player_y_range == enemy_y_range:
-#         print("boom")
+def movingBullet(y):
+    if y < 0:
+        global bulletState
+        bulletState = "ready"
+        return 0
+    return y-1
+
+
+########################## initialise the pygame###################
+pygame.init()
+########################## Create a window, naming title and setting an Icon ########################
+pygame.display.set_caption("Space invaders")
+pygame.display.set_icon(icon)
+screen = pygame.display.set_mode((800, 600))
 
 
 ######################## LOOP TO DISPLAY GAME SCREEN ################################
+xChange = 0
+yChange = 0
 running = True
 while running:
-    ################# Filling color in the window in RGB format #####################
-    screen.fill((0, 255, 255))
-    background()
+    ################# Displaying image in window #####################
+    displayImage((player_x, player_y),
+                 (enemy_x, enemy_y),
+                 (bullet_x, bullet_y))
     ############## pygame.event.get() capture all the event perform across the window ##############
     for event in pygame.event.get():
         ###### Checking if quit button is pressed or not (X) in window bar ##########
@@ -110,19 +96,22 @@ while running:
             ##### Checking if left arrow is clicked ######
             if event.key == pygame.K_LEFT:
                 ## if clicked changing coordinates
-                xChange = -movingIndex
+                xChange = -playerChange
             ##### Checking if right arrow is clicked ######
             elif event.key == pygame.K_RIGHT:
                 ## if clicked changing coordinates
-                xChange = movingIndex
+                xChange = playerChange
             ##### Checking if UP arrow is clicked ######
             elif event.key == pygame.K_UP:
                 ## if clicked changing coordinates
-                yChange = -movingIndex
+                yChange = -playerChange
             ##### Checking if Down arrow is clicked ######
             elif event.key == pygame.K_DOWN:
                 ## if clicked changing coordinates
-                yChange = movingIndex
+                yChange = playerChange
+            elif event.key == pygame.K_SPACE:
+                bulletState = "fire"
+                bullet_x, bullet_y = player_bullet_x + player_x, player_y - player_bullet_y
         ###### Checking if any key is released ######
         if event.type == pygame.KEYUP:
             ##### Checking which key is released #####
@@ -133,13 +122,11 @@ while running:
                 xChange = 0
 
     ##### player condition to check if object is moving outside the screen #########
-    player_x_coordinates, player_y_coordinates = playerCondition(player_x_coordinates + xChange,
-                                                                 player_y_coordinates + yChange)
+    player_x, player_y = playerCondition(player_x + xChange,
+                                         player_y + yChange)
     ########## Checking enemy position ###########
-    enemy_x_coordinates, enemy_y_coordinates = enemyCondition(enemy_x_coordinates, enemy_y_coordinates)
-    ####### updating the position of spaceship and enemy as per the change in coordinates #######
-    # checkBlast(player_x_coordinates, player_y_coordinates, enemy_x_coordinates, enemy_y_coordinates)
-    player()
-    enemy()
+    enemy_x, enemy_y = enemyCondition(enemy_x, enemy_y)
     ####### This will update all the changes made in the screen
+    if bulletState == "fire":
+        bullet_y = movingBullet(bullet_y)
     pygame.display.update()
