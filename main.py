@@ -1,13 +1,5 @@
 import pygame
 from random import randrange
-from numpy import arange
-
-############################## loading required Images   #############################
-icon = pygame.image.load("shooterJetIcon.png")
-playerSpaceship = pygame.image.load("space-ship.png")
-enemyImg = pygame.image.load("ufo.png")
-backgroundImg = pygame.image.load("background image.jpg")
-bulletImg = pygame.image.load("bullet.png")
 
 
 def randomPositionEnemy():
@@ -20,19 +12,45 @@ enemy_x, enemy_y = randomPositionEnemy()
 bullet_x, bullet_y, bulletState = 370, 464, "ready"
 player_bullet_x, player_bullet_y = 20, 16
 ################## movement of Images by declared pixel ########################
-playerChange = 0.5
+playerChange = 0.8
 enemyChange = 0.3
 bulletChange = 0.8
+blastCounter = 0
+score = 0
+
+
+class Bullet:
+    def __init__(self):
+        self.x = player_x+player_bullet_x
+        self.y = player_y-player_bullet_y
+        self.state = "ready"
+
+    def set(self, x, y):
+        self.x = x
+        self.y = y
+        self.state = "fire"
+
+
+############################## loading required Images   #############################
+icon = pygame.image.load("shooterJetIcon.png")
+playerSpaceship = pygame.image.load("space-ship.png")
+enemyImg = pygame.image.load("ufo.png")
+backgroundImg = pygame.image.load("background image.jpg")
+blastImg = pygame.image.load("blast.png")
+bulletImg = pygame.image.load("bullet.png")
+totalBullet = [Bullet() for i in range(100)]
+BulletCounter = 0
+# collide = False
 
 
 ##################   function to draw the all the images in their respective coordinates ############
-def displayImage(playerCoordinate, enemyCoordinates, bulletCoordinates):
+def displayImage(playerCoordinate, enemyCoordinates):
     screen.blit(backgroundImg, (0, 0))
     screen.blit(playerSpaceship, playerCoordinate)
     screen.blit(enemyImg, enemyCoordinates)
-    print(bulletState)
-    if bulletState == "fire":
-        screen.blit(bulletImg, bulletCoordinates)
+    for bullets in totalBullet:
+        if bullets.state == "fire":
+            screen.blit(bulletImg, (bullets.x, bullets.y))
 
 
 ##################### Tracking player movement and restricting to move #############
@@ -52,7 +70,7 @@ def playerCondition(x_coordinates, y_coordinates):
 def enemyCondition(x_coordinates, y_coordinates):
     if x_coordinates > 800:
         x_coordinates = 0
-        y_coordinates += enemyChange
+        y_coordinates += enemyChange + 3
     else:
         x_coordinates += enemyChange
     if y_coordinates > 600:
@@ -62,11 +80,19 @@ def enemyCondition(x_coordinates, y_coordinates):
 
 
 def movingBullet(y):
-    if y < 0:
-        global bulletState
-        bulletState = "ready"
-        return 0
-    return y-1
+    return y - 1
+
+
+def collision():
+    for bullets in totalBullet:
+        global enemy_x, enemy_y
+        if bullets.state == "fire" and (enemy_x-bullets.x)**2 + (enemy_y-bullets.y)**2 < 100:
+            return True
+    return False
+
+
+def displayBlast(x, y):
+    screen.blit(blastImg, (x, y))
 
 
 ########################## initialise the pygame###################
@@ -76,16 +102,13 @@ pygame.display.set_caption("Space invaders")
 pygame.display.set_icon(icon)
 screen = pygame.display.set_mode((800, 600))
 
-
 ######################## LOOP TO DISPLAY GAME SCREEN ################################
 xChange = 0
 yChange = 0
 running = True
 while running:
     ################# Displaying image in window #####################
-    displayImage((player_x, player_y),
-                 (enemy_x, enemy_y),
-                 (bullet_x, bullet_y))
+    displayImage((player_x, player_y), (enemy_x, enemy_y))
     ############## pygame.event.get() capture all the event perform across the window ##############
     for event in pygame.event.get():
         ###### Checking if quit button is pressed or not (X) in window bar ##########
@@ -109,9 +132,10 @@ while running:
             elif event.key == pygame.K_DOWN:
                 ## if clicked changing coordinates
                 yChange = playerChange
+            ##### checking if space Bar is clicked ########
             elif event.key == pygame.K_SPACE:
-                bulletState = "fire"
-                bullet_x, bullet_y = player_bullet_x + player_x, player_y - player_bullet_y
+                totalBullet[BulletCounter].set(player_x+player_bullet_x, player_y-player_bullet_y)
+                BulletCounter += 1
         ###### Checking if any key is released ######
         if event.type == pygame.KEYUP:
             ##### Checking which key is released #####
@@ -127,6 +151,21 @@ while running:
     ########## Checking enemy position ###########
     enemy_x, enemy_y = enemyCondition(enemy_x, enemy_y)
     ####### This will update all the changes made in the screen
-    if bulletState == "fire":
-        bullet_y = movingBullet(bullet_y)
+    for index,bullet in enumerate(totalBullet):
+        if bullet.state == "fire":
+            bullet.set(bullet.x, movingBullet(bullet.y))
+            if bullet.y < 0:
+                bullet.state = "ready"
+    ######### collision occurs ##########
+    if (collide := collision()) or blastCounter != 0:
+        if collide:
+            blastCounter = 70
+            blast_x, blast_y = enemy_x, enemy_y
+            enemy_x, enemy_y = randomPositionEnemy()
+            collide = False
+            score += 1
+            print(score)
+        blastCounter -= 1
+        displayBlast(blast_x, blast_y)
+
     pygame.display.update()
