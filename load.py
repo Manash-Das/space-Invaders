@@ -2,9 +2,6 @@ from time import time
 from random import randrange
 import pygame
 ############################## loading required Images   #############################
-from pygame import Surface
-from pygame.surface import SurfaceType
-
 pygame.init()
 startingBackground = pygame.image.load("Images/starting background.jpg")
 bullet = pygame.image.load("Images/bullet.png")
@@ -18,12 +15,12 @@ mute = pygame.image.load("Images/mute.png")
 wall = pygame.image.load("Images/wall.png")
 
 ############################ loading text ####################################
-startGame = pygame.font.Font("freesansbold.ttf", 64)
+startGame = pygame.font.Font("font.ttf", 64)
 startText = startGame.render("START", True, (255, 255, 255))
-exitGame = pygame.font.Font("freesansbold.ttf", 32)
+exitGame = pygame.font.Font("font.ttf", 32)
 end = exitGame.render("EXIT", True, (255, 255, 255))
-overText = startGame.render("You Win", True, (255, 255, 255))
-levels = pygame.font.Font("freesansbold.ttf", 24)
+overText = startGame.render("level completed", True, (255, 255, 255))
+levels = pygame.font.Font("font.ttf", 24)
 levelText = levels.render("Levels", True, (0, 255, 255))
 
 
@@ -34,6 +31,9 @@ level3 = levels.render("Levels 3", True, (255, 255, 255))
 level4 = levels.render("Levels 4", True, (255, 255, 255))
 level5 = levels.render("Levels 5", True, (255, 255, 255))
 level6 = levels.render("Levels 6", True, (255, 255, 255))
+
+############## Loading musics ##################
+strike = pygame.mixer.Sound("Music/striking bullet and wall.mp3")
 
 
 ######################### Bullets Class ###########################
@@ -47,6 +47,7 @@ class Bullet:
         self.x = x
         self.y = y
         self.state = state
+
 
 
 def randomPositionEnemy():

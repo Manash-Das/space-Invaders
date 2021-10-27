@@ -2,9 +2,11 @@ import load
 import pygame
 import DisplayImages
 import sys
-import constantTerm
 import checkcondition as check
 from time import time
+import constantTerm
+pygame.init()
+const = constantTerm.Const()
 def HomePage(screen):
     while True:
         screen.blit(load.startingBackground, (0, 0))
@@ -48,10 +50,13 @@ def Levels(screen):
                     return
         pygame.display.update()
 
-def game(screen):
+def game(screen, level):
+    const.constant(level)
     ######### Creating multiple bullet and enemy ################
-    allBullet = [load.Bullet() for i in range(100)]
-    allEnemy = [load.Enemy() for j in range(10)]
+    allBullet = [load.Bullet() for i in range(const.NO_OF_BULLET)]
+    allEnemy = [load.Enemy() for j in range(const.NO_OF_ENEMY)]
+    print("No of enemy is ", len(allEnemy))
+    print("No of bullet is ", len(allBullet))
     BulletCounter = 0
     ################## Coordinates of image to display ##############################
     player_x, player_y = 370, 480
@@ -64,8 +69,8 @@ def game(screen):
     score = 0
     while run:
         ################# Displaying image in window #####################
-        DisplayImages.displayImage(screen, allBullet, (player_x, player_y), allEnemy, score)
-        if score == 10:
+        DisplayImages.displayImage(level, screen, allBullet, (player_x, player_y), allEnemy, score)
+        if score == const.NO_OF_ENEMY:
             break
         ############## pygame.events.get() capture all the events perform across the window ##############
         for events in pygame.event.get():
@@ -77,19 +82,19 @@ def game(screen):
                 ##### Checking if left arrow is clicked ######
                 if events.key == pygame.K_LEFT:
                     ## if clicked changing coordinates
-                    xChange = -constantTerm.PLAYERMOVEMENT
+                    xChange = -const.PLAYER_MOVEMENT
                 ##### Checking if right arrow is clicked ######
                 elif events.key == pygame.K_RIGHT:
                     ## if clicked changing coordinates
-                    xChange = constantTerm.PLAYERMOVEMENT
+                    xChange = const.PLAYER_MOVEMENT
                 ##### Checking if UP arrow is clicked ######
                 elif events.key == pygame.K_UP:
                     ## if clicked changing coordinates
-                    yChange = -constantTerm.PLAYERMOVEMENT
+                    yChange = -const.PLAYER_MOVEMENT
                 ##### Checking if Down arrow is clicked ######
                 elif events.key == pygame.K_DOWN:
                     ## if clicked changing coordinates
-                    yChange = constantTerm.PLAYERMOVEMENT
+                    yChange = const.PLAYER_MOVEMENT
                 ##### checking if space Bar is clicked ########
                 elif events.key == pygame.K_SPACE:
                     bulletSound = pygame.mixer.Sound("Music/laser.wav")
@@ -99,8 +104,8 @@ def game(screen):
             ###### Checking if any key is released ######
             if events.type == pygame.KEYUP:
                 ##### Checking which key is released #####
-                if events.key == pygame.K_LEFT or events.key == pygame.K_RIGHT or events.key == pygame.K_DOWN or \
-                        events.key == pygame.K_UP:
+                if events.key == pygame.K_LEFT or events.key == pygame.K_RIGHT or events.key == pygame.K_DOWN\
+                        or events.key == pygame.K_UP:
                     ### if found no change in coordinates ###
                     yChange = 0
                     xChange = 0
@@ -111,15 +116,14 @@ def game(screen):
         ####### if bullet is fired then setting position and taking care of bullet outside the frame ############
         for bullet in allBullet:
             if bullet.state == "fire":
-                check.bullet(bullet)
+                check.bullet(bullet, const.BULLET_MOVEMENT)
 
         for enemy in allEnemy:
             if enemy.state == "Alive":
                 ########## Checking enemy position ###########
-                enemy.x, enemy.y = check.enemy(enemy.x, enemy.y)
-
+                enemy.x, enemy.y = check.enemy(enemy.x, enemy.y, const.ENEMY_MOVEMENT)
                 ######### collision occurs ##########
-                if check.collision(enemy, allBullet):
+                if check.collision(level, enemy, allBullet):
                     explosionSound = pygame.mixer.Sound("Music/explosion.wav")
                     explosionSound.play()
                     score += 1
@@ -137,6 +141,9 @@ def completingLevels(screen):
         screen.blit(load.background, (0, 0))
         screen.blit(load.overText, (200, 200))
         for event in pygame.event.get():
-            if event.type == pygame.K_SPACE or event.type == pygame.QUIT:
-                running = False
+            if event.type == pygame.QUIT:
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    running = False
         pygame.display.update()
