@@ -6,10 +6,6 @@ import startingloop
 pygame.init()
 
 level = 0
-########### Levels counter ###############
-def levels(n):
-    return n + 1
-
 
 ########################## Create a window, naming title and setting an Icon ########################
 pygame.display.set_caption("Space invaders")
