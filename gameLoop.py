@@ -8,6 +8,10 @@ import constantTerm
 
 pygame.init()
 const = constantTerm.Const()
+pTime = 0
+cTime = 0
+FPS = 90
+fpsClock = pygame.time.Clock()
 
 
 def HomePage(screen):
@@ -56,30 +60,28 @@ def Levels(screen):
 
 
 def game(screen, level):
+
     const.constant(level)
-    ######### Creating multiple bullet and enemy ################
+    ######### Creating multiple bullet enemy, and wall ################
     allBullet = [load.Bullet() for i in range(const.NO_OF_BULLET)]
-    # print(len(allBullet))
     allEnemy = [load.Enemy() for j in range(const.NO_OF_ENEMY)]
-    print("No of enemy is ", len(allEnemy))
-    print("No of bullet is ", len(allBullet))
     BulletCounter = 0
     ################## Coordinates of image to display ##############################
     player_x, player_y = 370, 480
     player_bullet_x, player_bullet_y = 20, 16
 
     ################## movement of Images by declared pixel ########################
-    xChange = 0
-    yChange = 0
+    xSpeed = 0
+    ySpeed = 0
     score = 0
     while True:
         ################# Displaying image in window #####################
         DisplayImages.displayImage(level, screen, allBullet, (player_x, player_y), allEnemy, score,
                                    const.NO_OF_BULLET - BulletCounter, len(allEnemy))
         if score == const.NO_OF_ENEMY:
-            return True
+            return "completed"
         if BulletCounter == const.NO_OF_BULLET:
-            return False
+            return "bullet"
         ############## pygame.events.get() capture all the events perform across the window ##############
         for events in pygame.event.get():
             ###### Checking if quit button is pressed or not (X) in window bar ##########
@@ -90,25 +92,24 @@ def game(screen, level):
                 ##### Checking if left arrow is clicked ######
                 if events.key == pygame.K_LEFT:
                     ## if clicked changing coordinates
-                    xChange = -const.PLAYER_MOVEMENT
+                    xSpeed = -const.PLAYER_MOVEMENT
                 ##### Checking if right arrow is clicked ######
                 elif events.key == pygame.K_RIGHT:
                     ## if clicked changing coordinates
-                    xChange = const.PLAYER_MOVEMENT
+                    xSpeed = const.PLAYER_MOVEMENT
                 ##### Checking if UP arrow is clicked ######
                 elif events.key == pygame.K_UP:
                     ## if clicked changing coordinates
-                    yChange = -const.PLAYER_MOVEMENT
+                    ySpeed = -const.PLAYER_MOVEMENT
                 ##### Checking if Down arrow is clicked ######
                 elif events.key == pygame.K_DOWN:
                     ## if clicked changing coordinates
-                    yChange = const.PLAYER_MOVEMENT
+                    ySpeed = const.PLAYER_MOVEMENT
                 ##### checking if space Bar is clicked ########
                 elif events.key == pygame.K_SPACE:
                     load.bulletSound.play()
 
                     allBullet[BulletCounter].set(player_x + player_bullet_x, player_y - player_bullet_y)
-                    print(BulletCounter)
                     BulletCounter += 1
             ###### Checking if any key is released ######
             if events.type == pygame.KEYUP:
@@ -116,11 +117,12 @@ def game(screen, level):
                 if events.key == pygame.K_LEFT or events.key == pygame.K_RIGHT or events.key == pygame.K_DOWN \
                         or events.key == pygame.K_UP:
                     ### if found no change in coordinates ###
-                    yChange = 0
-                    xChange = 0
-
+                    ySpeed = 0
+                    xSpeed = 0
+            if events.type == pygame.MOUSEBUTTONDOWN:
+                print(pygame.mouse.get_pos())
         ##### player condition to check if object is moving outside the screen #########
-        player_x, player_y = check.player(player_x + xChange, player_y + yChange)
+        player_x, player_y = check.player(player_x, player_y, xSpeed, ySpeed, level)
 
         ####### if bullet is fired then setting position and taking care of bullet outside the frame ############
         for bullet in allBullet:
@@ -141,22 +143,35 @@ def game(screen, level):
                     DisplayImages.displayBlast(screen, enemy.x, enemy.y)
                 else:
                     allEnemy.remove(enemy)
-
         pygame.display.update()
+        fpsClock.tick(FPS)
 
 
-def completingLevels(screen, state="success"):
+def completingLevels(screen, reason="completed"):
     running = True
+    displayText = load.levels.render("Press p to play and q to quit", True, (200, 255, 255))
+    text_rect = displayText.get_rect(center=(400, 400))
+    if reason == "completed":
+        displayText1 = load.startGame.render("Great", True, (200, 200, 200))
+        displayText2 = load.startGame.render("you win", True, (200, 200, 200))
+    elif reason == "bullet":
+        displayText1 = load.startGame.render("Bullet Finished", True, (200, 200, 200))
+        displayText2 = load.startGame.render("You lose", True, (200, 200, 200))
+    text_rect1 = displayText1.get_rect(center=(400, 150))
+    text_rect2 = displayText2.get_rect(center=(400, 300))
+
     while running:
         screen.blit(load.background, (0, 0))
-        if state == "failed":
-            screen.blit(load.levelFailed, (270, 250))
-        else:
-            screen.blit(load.levelCompleted, (180, 250))
+        screen.blit(displayText,text_rect)
+        screen.blit(displayText1, text_rect1)
+        screen.blit(displayText2, text_rect2)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
+                if event.key == pygame.K_p:
                     running = False
+                if event.key == pygame.K_q:
+                    sys.exit()
+
         pygame.display.update()

@@ -4,7 +4,7 @@ import sys
 import gameLoop
 pygame.init()
 
-level = 3
+level = 1
 ########################## Create a window, naming title and setting an Icon ########################
 pygame.display.set_caption("Space invaders")
 pygame.display.set_icon(load.icon)
@@ -19,9 +19,8 @@ if not gameLoop.HomePage(screen):
 
 
 while level < 4:
-    if gameLoop.game(screen, level):
-        gameLoop.completingLevels(screen)
-    else:
-        gameLoop.completingLevels(screen, "failed")
-    level = level + 1
+    reason = gameLoop.game(screen, level)
+    gameLoop.completingLevels(screen,reason)
+    if reason == "completed":
+        level = level + 1
 

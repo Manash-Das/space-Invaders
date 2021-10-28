@@ -29,9 +29,9 @@ def displayImage(level, screen, allBullet, playerCoordinate, allEnemy, score, no
         screen.blit(load.wall, (500, 100))
         screen.blit(load.wall, (700, 100))
     elif level == 3:
-        screen.blit(load.wall, (100, 100))
-        screen.blit(load.wall, (300, 500))
-        pygame.draw.line(screen, (25, 0, 255), (200, 300), (300, 400), 10)
+        screen.blit(load.wall, (150, 150))
+        screen.blit(load.wall, (350, 350))
+        screen.blit(load.wall, (550, 150))
 
 
 def displayBlast(screen, x, y):

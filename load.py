@@ -24,7 +24,6 @@ end = exitGame.render("EXIT", True, (255, 255, 255))
 levelCompleted = startGame.render("level completed", True, (255, 255, 255))
 levels = pygame.font.Font("font.ttf", 24)
 levelText = levels.render("Levels", True, (0, 255, 255))
-levelFailed = startGame.render("You lose", True, (255, 255, 255))
 
 ######### Different Levels ########
 level1 = levels.render("Levels 1", True, (255, 255, 255))
@@ -66,3 +65,12 @@ class Enemy:
     def set(self, state="shoot"):
         self.state = state
         self.killedTime = time()
+
+class Wall:
+    def __init__(self):
+        self.x = 0
+        self.y = 0
+
+    def set(self, x, y):
+        self.x = x
+        self.y = y
