@@ -13,16 +13,18 @@ blast = pygame.image.load("Images/blast.png")
 sound = pygame.image.load("Images/sound.png")
 mute = pygame.image.load("Images/mute.png")
 wall = pygame.image.load("Images/wall.png")
+hor_line = pygame.image.load("Images/horizontal line.png")
+
 
 ############################ loading text ####################################
 startGame = pygame.font.Font("font.ttf", 64)
 startText = startGame.render("START", True, (255, 255, 255))
 exitGame = pygame.font.Font("font.ttf", 32)
 end = exitGame.render("EXIT", True, (255, 255, 255))
-overText = startGame.render("level completed", True, (255, 255, 255))
+levelCompleted = startGame.render("level completed", True, (255, 255, 255))
 levels = pygame.font.Font("font.ttf", 24)
 levelText = levels.render("Levels", True, (0, 255, 255))
-
+levelFailed = startGame.render("You lose", True, (255, 255, 255))
 
 ######### Different Levels ########
 level1 = levels.render("Levels 1", True, (255, 255, 255))
@@ -34,7 +36,7 @@ level6 = levels.render("Levels 6", True, (255, 255, 255))
 
 ############## Loading musics ##################
 strike = pygame.mixer.Sound("Music/striking bullet and wall.mp3")
-
+bulletSound = pygame.mixer.Sound("Music/laser.wav")
 
 ######################### Bullets Class ###########################
 class Bullet:
@@ -47,7 +49,6 @@ class Bullet:
         self.x = x
         self.y = y
         self.state = state
-
 
 
 def randomPositionEnemy():

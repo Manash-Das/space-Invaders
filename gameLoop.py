@@ -5,8 +5,11 @@ import sys
 import checkcondition as check
 from time import time
 import constantTerm
+
 pygame.init()
 const = constantTerm.Const()
+
+
 def HomePage(screen):
     while True:
         screen.blit(load.startingBackground, (0, 0))
@@ -29,6 +32,7 @@ def HomePage(screen):
                     Levels(screen)
         pygame.display.update()
 
+
 def Levels(screen):
     print("I am in levels")
     while True:
@@ -50,10 +54,12 @@ def Levels(screen):
                     return
         pygame.display.update()
 
+
 def game(screen, level):
     const.constant(level)
     ######### Creating multiple bullet and enemy ################
     allBullet = [load.Bullet() for i in range(const.NO_OF_BULLET)]
+    # print(len(allBullet))
     allEnemy = [load.Enemy() for j in range(const.NO_OF_ENEMY)]
     print("No of enemy is ", len(allEnemy))
     print("No of bullet is ", len(allBullet))
@@ -65,13 +71,15 @@ def game(screen, level):
     ################## movement of Images by declared pixel ########################
     xChange = 0
     yChange = 0
-    run = True
     score = 0
-    while run:
+    while True:
         ################# Displaying image in window #####################
-        DisplayImages.displayImage(level, screen, allBullet, (player_x, player_y), allEnemy, score)
+        DisplayImages.displayImage(level, screen, allBullet, (player_x, player_y), allEnemy, score,
+                                   const.NO_OF_BULLET - BulletCounter, len(allEnemy))
         if score == const.NO_OF_ENEMY:
-            break
+            return True
+        if BulletCounter == const.NO_OF_BULLET:
+            return False
         ############## pygame.events.get() capture all the events perform across the window ##############
         for events in pygame.event.get():
             ###### Checking if quit button is pressed or not (X) in window bar ##########
@@ -97,14 +105,15 @@ def game(screen, level):
                     yChange = const.PLAYER_MOVEMENT
                 ##### checking if space Bar is clicked ########
                 elif events.key == pygame.K_SPACE:
-                    bulletSound = pygame.mixer.Sound("Music/laser.wav")
-                    bulletSound.play()
+                    load.bulletSound.play()
+
                     allBullet[BulletCounter].set(player_x + player_bullet_x, player_y - player_bullet_y)
+                    print(BulletCounter)
                     BulletCounter += 1
             ###### Checking if any key is released ######
             if events.type == pygame.KEYUP:
                 ##### Checking which key is released #####
-                if events.key == pygame.K_LEFT or events.key == pygame.K_RIGHT or events.key == pygame.K_DOWN\
+                if events.key == pygame.K_LEFT or events.key == pygame.K_RIGHT or events.key == pygame.K_DOWN \
                         or events.key == pygame.K_UP:
                     ### if found no change in coordinates ###
                     yChange = 0
@@ -121,7 +130,7 @@ def game(screen, level):
         for enemy in allEnemy:
             if enemy.state == "Alive":
                 ########## Checking enemy position ###########
-                enemy.x, enemy.y = check.enemy(enemy.x, enemy.y, const.ENEMY_MOVEMENT)
+                enemy.x, enemy.y = check.enemy(enemy.x, enemy.y, const.ENEMY_MOVEMENT_X, const.ENEMY_MOVEMENT_Y)
                 ######### collision occurs ##########
                 if check.collision(level, enemy, allBullet):
                     explosionSound = pygame.mixer.Sound("Music/explosion.wav")
@@ -135,11 +144,15 @@ def game(screen, level):
 
         pygame.display.update()
 
-def completingLevels(screen):
+
+def completingLevels(screen, state="success"):
     running = True
     while running:
         screen.blit(load.background, (0, 0))
-        screen.blit(load.overText, (200, 200))
+        if state == "failed":
+            screen.blit(load.levelFailed, (270, 250))
+        else:
+            screen.blit(load.levelCompleted, (180, 250))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()

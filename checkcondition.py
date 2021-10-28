@@ -19,12 +19,12 @@ def player(x_coordinates, y_coordinates):
 
 
 ##################### Tracking enemy movement and restricting to move #############
-def enemy(x_coordinates, y_coordinates, ENEMY_MOVEMENT):
+def enemy(x_coordinates, y_coordinates, move_x, move_y):
     if x_coordinates > 800:
         x_coordinates = 0
-        y_coordinates += 50  # constantTerm.ENEMY_MOVEMENT
+        y_coordinates += move_y
     else:
-        x_coordinates += ENEMY_MOVEMENT
+        x_coordinates += move_x
     if y_coordinates > 600:
         print("YOU LOSE")
         return randomPositionEnemy()
@@ -43,12 +43,11 @@ def collision(level, enemies, totalBullet):
         if bullets.state == "fire":
             if (enemies.x - bullets.x) ** 2 + (enemies.y - bullets.y) ** 2 < 200:
                 enemies.set()
-                totalBullet.remove(bullets)
+                # totalBullet.remove(bullets)
                 return True
             if level == 2 and 100 <= bullets.y <= 164 and (90 <= bullets.x <= 154 or 290 <= bullets.x <= 354 or
                                                            490 <= bullets.x <= 554 or 690 <= bullets.x <= 764):
                 load.strike.play()
                 bullets.state = "ready"
 
-                # pygame.draw.rect(screen, (0, 0, 255), (100, 100, 75, 54))
     return False
