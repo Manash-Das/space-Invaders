@@ -5,14 +5,13 @@ import sys
 import checkcondition as check
 from time import time
 import constantTerm
-
+from random import randrange
 pygame.init()
 const = constantTerm.Const()
 pTime = 0
 cTime = 0
 FPS = 90
 fpsClock = pygame.time.Clock()
-
 
 def HomePage(screen):
     while True:
@@ -21,8 +20,9 @@ def HomePage(screen):
         pygame.draw.rect(screen, (170, 170, 170), [30, 550, 81, 30])
         screen.blit(load.startText, (300, 250))
         screen.blit(load.end, (30, 550))
-        pygame.draw.rect(screen, (255, 255, 255), [300, 350, 79, 25])
-        screen.blit(load.levelText, (300, 350))
+        screen.blit(load.createdText, load.createdText.get_rect(center=(400, 400)))
+        # pygame.draw.rect(screen, (255, 255, 255), [300, 350, 79, 25])
+        # screen.blit(load.levelText, (300, 350))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return False
@@ -32,8 +32,8 @@ def HomePage(screen):
                     return True
                 elif 30 <= mousePosition[0] <= 111 and 550 <= mousePosition[1] <= 580:
                     return False
-                elif 300 <= mousePosition[0] <= 379 and 350 <= mousePosition[1] <= 375:
-                    Levels(screen)
+                # elif 300 <= mousePosition[0] <= 379 and 350 <= mousePosition[1] <= 375:
+                #     Levels(screen)
         pygame.display.update()
 
 
@@ -65,6 +65,7 @@ def game(screen, level):
     ######### Creating multiple bullet enemy, and wall ################
     allBullet = [load.Bullet() for i in range(const.NO_OF_BULLET)]
     allEnemy = [load.Enemy() for j in range(const.NO_OF_ENEMY)]
+    Stones = load.Stone()
     BulletCounter = 0
     ################## Coordinates of image to display ##############################
     player_x, player_y = 370, 480
@@ -76,8 +77,8 @@ def game(screen, level):
     score = 0
     while True:
         ################# Displaying image in window #####################
-        DisplayImages.displayImage(level, screen, allBullet, (player_x, player_y), allEnemy, score,
-                                   const.NO_OF_BULLET - BulletCounter, len(allEnemy))
+        DisplayImages.displayImage(level, screen, allBullet, (player_x, player_y), allEnemy, score, Stones,
+                                   const.NO_OF_BULLET - BulletCounter)
         if score == const.NO_OF_ENEMY:
             return "completed"
         if BulletCounter == const.NO_OF_BULLET:
@@ -119,8 +120,6 @@ def game(screen, level):
                     ### if found no change in coordinates ###
                     ySpeed = 0
                     xSpeed = 0
-            if events.type == pygame.MOUSEBUTTONDOWN:
-                print(pygame.mouse.get_pos())
         ##### player condition to check if object is moving outside the screen #########
         player_x, player_y = check.player(player_x, player_y, xSpeed, ySpeed, level)
 
@@ -129,20 +128,39 @@ def game(screen, level):
             if bullet.state == "fire":
                 check.bullet(bullet, const.BULLET_MOVEMENT)
 
+        ##################### Checking Enemy strike ####################
         for enemy in allEnemy:
             if enemy.state == "Alive":
                 ########## Checking enemy position ###########
                 enemy.x, enemy.y = check.enemy(enemy.x, enemy.y, const.ENEMY_MOVEMENT_X, const.ENEMY_MOVEMENT_Y)
                 ######### collision occurs ##########
-                if check.collision(level, enemy, allBullet):
+                if check.bulletCollision(level, enemy, allBullet):
                     explosionSound = pygame.mixer.Sound("Music/explosion.wav")
                     explosionSound.play()
                     score += 1
+                if check.playerCollision(enemy, player_x, player_y):
+                    explosionSound = pygame.mixer.Sound("Music/explosion.wav")
+                    explosionSound.play()
+                    return "blast"
             if enemy.state == "shoot":
-                if time() - enemy.killedTime < 0.1:
+                if time() - enemy.killedTime < 0.15:
                     DisplayImages.displayBlast(screen, enemy.x, enemy.y)
                 else:
                     allEnemy.remove(enemy)
+
+        #################### checking stones ##################
+        if Stones.state == "fall":
+            if Stones.y > 650:
+                Stones.y = 0
+                Stones.x = randrange(0,800)
+                Stones.state = "ready"
+            if check.stone(Stones.x, Stones.y, player_x, player_y):
+                return "blast"
+            Stones.y += const.STONES_MOVEMENT_Y
+        else:
+            random = randrange(0, 1000)
+            if random % 17 == 0:
+                Stones.state = "fall"
         pygame.display.update()
         fpsClock.tick(FPS)
 
@@ -157,12 +175,15 @@ def completingLevels(screen, reason="completed"):
     elif reason == "bullet":
         displayText1 = load.startGame.render("Bullet Finished", True, (200, 200, 200))
         displayText2 = load.startGame.render("You lose", True, (200, 200, 200))
+    elif reason == "blast":
+        displayText1 = load.startGame.render("You were killed", True, (200, 200, 200))
+        displayText2 = load.startGame.render("You lose", True, (200, 200, 200))
     text_rect1 = displayText1.get_rect(center=(400, 150))
     text_rect2 = displayText2.get_rect(center=(400, 300))
 
     while running:
         screen.blit(load.background, (0, 0))
-        screen.blit(displayText,text_rect)
+        screen.blit(displayText, text_rect)
         screen.blit(displayText1, text_rect1)
         screen.blit(displayText2, text_rect2)
         for event in pygame.event.get():

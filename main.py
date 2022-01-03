@@ -12,13 +12,13 @@ screen = pygame.display.set_mode((800, 600))
 
 ############################# music ##############################
 pygame.mixer.music.load("Music/background.wav")
-pygame.mixer.music.play(-1)
+# pygame.mixer.music.play(-1)
 
 if not gameLoop.HomePage(screen):
     sys.exit()
 
 
-while level < 4:
+while level < 5:
     reason = gameLoop.game(screen, level)
     gameLoop.completingLevels(screen,reason)
     if reason == "completed":

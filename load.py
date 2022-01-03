@@ -5,6 +5,7 @@ import pygame
 pygame.init()
 startingBackground = pygame.image.load("Images/starting background.jpg")
 bullet = pygame.image.load("Images/bullet.png")
+STONE = pygame.image.load("Images/stone.png")
 icon = pygame.image.load("Images/shooterJetIcon.png")
 spaceship = pygame.image.load("Images/space-ship.png")
 enemy = pygame.image.load("Images/ufo.png")
@@ -24,8 +25,9 @@ end = exitGame.render("EXIT", True, (255, 255, 255))
 levelCompleted = startGame.render("level completed", True, (255, 255, 255))
 levels = pygame.font.Font("font.ttf", 24)
 levelText = levels.render("Levels", True, (0, 255, 255))
+createdText = levels.render("Created by Manash Game Production", "True", (255,255,255))
 
-######### Different Levels ########
+######################## Different Levels ###################################
 level1 = levels.render("Levels 1", True, (255, 255, 255))
 level2 = levels.render("Levels 2", True, (255, 255, 255))
 level3 = levels.render("Levels 3", True, (255, 255, 255))
@@ -48,6 +50,17 @@ class Bullet:
         self.x = x
         self.y = y
         self.state = state
+
+
+###################### STONE CLASS ###############################
+class Stone:
+    def __init__(self):
+        self.x = randrange(0, 800)
+        self.y = 0
+        self.state = "ready"
+
+    def set(self):
+        self.state = "fall"
 
 
 def randomPositionEnemy():
