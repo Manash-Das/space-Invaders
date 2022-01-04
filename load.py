@@ -56,7 +56,7 @@ class Bullet:
 class Stone:
     def __init__(self):
         self.x = randrange(0, 800)
-        self.y = 0
+        self.y = -100
         self.state = "ready"
 
     def set(self):

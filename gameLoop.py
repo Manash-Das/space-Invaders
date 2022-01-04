@@ -88,8 +88,15 @@ def game(screen, level):
             ###### Checking if quit button is pressed or not (X) in window bar ##########
             if events.type == pygame.QUIT:
                 sys.exit()
+
             ###### Checking if any key is pressed ######
             if events.type == pygame.KEYDOWN:
+                ######## skip level #########
+                if events.key == pygame.K_n:
+                    return "completed"
+                ######### increase bullets #############
+                if events.key == pygame.K_m:
+                    BulletCounter -= 5
                 ##### Checking if left arrow is clicked ######
                 if events.key == pygame.K_LEFT:
                     ## if clicked changing coordinates
@@ -109,7 +116,6 @@ def game(screen, level):
                 ##### checking if space Bar is clicked ########
                 elif events.key == pygame.K_SPACE:
                     load.bulletSound.play()
-
                     allBullet[BulletCounter].set(player_x + player_bullet_x, player_y - player_bullet_y)
                     BulletCounter += 1
             ###### Checking if any key is released ######
